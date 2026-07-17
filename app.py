@@ -28,7 +28,7 @@ if st.button("دخول"):
         st.success(f"أهلاً بكِ {user.iloc[0]['Student_Name']}! يمكنك الآن البدء.")
         st.rerun() # تحديث الصفحة للدخول للمرحلة التالية
     else:
-        st.error("بيانات غير صحيحة أو غير مسجلة في قاعدة البيانات.")
+        st.error(" بيانات غير صحيحة أو غير مسجلة في قاعدة البيانات. برجاء التواصل مع معلمك لتسجيل بياناتك")
 
 # ما بعد الدخول
 if 'logged_in' in st.session_state and st.session_state['logged_in']:
