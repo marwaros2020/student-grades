@@ -65,39 +65,43 @@ else:
         st.session_state['logged_in'] = False
         st.rerun()
 
-   # لوحة تحكم الإدارة
+  # لوحة تحكم الإدارة
     st.write("---")
     if st.checkbox("دخول لوحة التحكم (للمسؤول)"):
         password = st.text_input("كلمة المرور:", type="password")
         if password == "1234":
             st.subheader("لوحة تحكم المسابقة")
             try:
-                # قراءة الملف مباشرة
+                # 1. قراءة الملف
                 subs_df = pd.read_excel('school_data.xlsx', sheet_name='Submissions')
                 
-                # عرض الجدول بشكل نظيف
+                # 2. تنظيف البيانات (حذف الصفوف التي لا تحتوي على أي رقم قومي)
+                subs_df = subs_df.dropna(subset=['National_ID'])
+                
+                # 3. عرض الجدول
                 cols_to_show = ['National_ID', 'Video_URL', 'Status', 'Comment']
                 st.dataframe(subs_df[cols_to_show])
                 
-                # إدخال البيانات للتعديل
+                # 4. اختيار الطالب والحالة
                 target_id = st.text_input("أدخل الرقم القومي للطالب لتعديل حالته:")
                 new_status = st.selectbox("اختر الحالة:", ["Approved", "Rejected"])
                 
                 if st.button("تحديث الحالة"):
-                    # التأكد من مطابقة الأنواع (String)
-                    subs_df['National_ID'] = subs_df['National_ID'].astype(str)
-                    subs_df['Status'] = new_status
+                    # التأكد من أننا نحدث الصف الذي يطابق الرقم القومي فقط
+                    # نحول النوع إلى string لتفادي أخطاء المقارنة
+                    mask = subs_df['National_ID'].astype(str) == target_id.strip()
                     
-                    # الفلترة بناءً على الرقم المدخل
-                    mask = subs_df['National_ID'] == target_id.strip()
-                    subs_df.loc[mask, 'Status'] = new_status
-                    
-                    # الحفظ
-                    with pd.ExcelWriter('school_data.xlsx', engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
-                        subs_df.to_excel(writer, sheet_name='Submissions', index=False)
-                    
-                    st.success(f"تم تحديث حالة الطالب {target_id} إلى {new_status}")
-                    st.rerun()
+                    if mask.any():
+                        subs_df.loc[mask, 'Status'] = new_status
+                        
+                        # الحفظ في الملف
+                        with pd.ExcelWriter('school_data.xlsx', engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
+                            subs_df.to_excel(writer, sheet_name='Submissions', index=False)
+                        st.success(f"تم تحديث حالة الطالب {target_id} إلى {new_status}")
+                        st.rerun()
+                    else:
+                        st.error("لم يتم العثور على طالب بهذا الرقم القومي.")
+                        
             except Exception as e:
                 st.error(f"حدث خطأ: {e}")
                 
