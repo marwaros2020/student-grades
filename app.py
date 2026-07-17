@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-# تعديل تحميل البيانات للتأكد من قراءة الورقة الصحيحة
+تعديل تحميل البيانات للتأكد من قراءة الورقة الصحيحة
 @st.cache_data
 def load_data():
     # تأكدي أن اسم الملف في المجلد هو school_data.xlsx
@@ -8,9 +8,12 @@ def load_data():
     # تنظيف أسماء الأعمدة من أي مسافات مخفية قد تسبب مشاكل
     df.columns = df.columns.str.strip()
     return df
+# تحميل البيانات
+@st.cache_data
+def load_data():
+    return pd.read_excel('school_data.xlsx', sheet_name='Students_List')
 
 students_df = load_data()
-
 
 st.title("🛡️ بوابة مسابقة التحدث باللغة الإنجليزية")
 
@@ -32,7 +35,7 @@ if st.button("دخول"):
         st.success(f"أهلاً بكِ {user.iloc[0]['Student_Name']}! يمكنك الآن البدء.")
         st.rerun() # تحديث الصفحة للدخول للمرحلة التالية
     else:
-        st.error(" بيانات غير صحيحة أو غير مسجلة في قاعدة البيانات. برجاء التواصل مع معلمك لتسجيل بياناتك")
+        st.error("بيانات غير صحيحة أو غير مسجلة في قاعدة البيانات.")
 
 # ما بعد الدخول
 if 'logged_in' in st.session_state and st.session_state['logged_in']:
@@ -40,11 +43,9 @@ if 'logged_in' in st.session_state and st.session_state['logged_in']:
     st.write("### مرحباً بك في صفحة المشاركة")
     st.write(f"المدرسة: {st.session_state['user_data']['School_Name']}")
     # هنا سنضيف لاحقاً زر رفع رابط الفيديو
-    if not result.empty:
-        st.success("تم العثور على الطالب!")
-        st.write(result.iloc[0])
-    else:
-        st.error("كود الطالب غير موجود، يرجى المحاولة مرة أخرى.")
+
         # أضيفي هذا السطر بعد تحميل البيانات مباشرة
 st.write("بيانات الطلاب المكتشفة:", students_df.head())
 st.write("أنواع البيانات في الملف:", students_df.dtypes)
+
+
