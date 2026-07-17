@@ -73,7 +73,17 @@ else:
             st.subheader("لوحة تحكم المسابقة")
             try:
                 subs_df = pd.read_excel('school_data.xlsx', sheet_name='Submissions')
-                st.dataframe(subs_df)
+                try:
+                subs_df = pd.read_excel('school_data.xlsx', sheet_name='Submissions')
+                
+                # التعديل الجديد: نختار فقط الأعمدة التي نحتاجها ونحذف الفارغ
+                cols_to_show = ['National_ID', 'Video_URL', 'Status', 'Comment']
+                # نستخدم .dropna(how='all') لحذف الصفوف الفارغة تماماً إن وجدت
+                display_df = subs_df[cols_to_show].dropna(how='all')
+                
+                st.dataframe(display_df)
+                
+                # ... باقي الكود كما هو
                 target_id = st.text_input("الرقم القومي للطالب لتعديل حالته:")
                 new_status = st.selectbox("اختر الحالة:", ["Approved", "Rejected"])
                 
