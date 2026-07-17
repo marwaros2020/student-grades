@@ -83,3 +83,30 @@ else:
     if st.button("خروج"):
         st.session_state['logged_in'] = False
         st.rerun()
+# --- لوحة تحكم الإدارة ---
+st.write("---")
+if st.checkbox("دخول لوحة التحكم (خاص بالمسؤول)"):
+    password = st.text_input("أدخل كلمة المرور:", type="password")
+    if password == "1234": # يمكنك تغيير كلمة المرور هنا
+        st.subheader("لوحة تحكم المسابقة")
+        
+        # قراءة المشاركات
+        try:
+            subs_df = pd.read_excel('school_data.xlsx', sheet_name='Submissions')
+            st.dataframe(subs_df)
+            
+            # خيار بسيط لتغيير الحالة
+            target_id = st.text_input("أدخل الرقم القومي للطالب لتعديل حالته:")
+            new_status = st.selectbox("اختر الحالة الجديدة:", ["Approved", "Rejected"])
+            
+            if st.button("تحديث الحالة"):
+                # منطق تحديث الحالة في الإكسيل
+                subs_df.loc[subs_df['National_ID'].astype(str) == target_id, 'Status'] = new_status
+                with pd.ExcelWriter('school_data.xlsx', engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
+                    subs_df.to_excel(writer, sheet_name='Submissions', index=False)
+                st.success("تم تحديث الحالة بنجاح!")
+                st.rerun()
+        except Exception as e:
+            st.error(f"لا توجد مشاركات بعد أو حدث خطأ: {e}")
+    else:
+        st.warning("كلمة مرور خاطئة.")
