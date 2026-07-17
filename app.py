@@ -57,11 +57,29 @@ else:
 
     if st.button("إرسال المشاركة"):
         if video_url:
-            st.info("تم استلام مشاركتك، وهي الآن قيد المراجعة من قبل الإدارة.")
-            # هنا سنضيف لاحقاً كود حفظ البيانات في ورقة Submissions
+            # تجهيز البيانات لحفظها
+            new_submission = pd.DataFrame({
+                'National_ID': [user['National_ID']],
+                'Video_URL': [video_url],
+                'Comment_Text': [comment],
+                'Status': ['Pending'] # الحالة الافتراضية
+            })
+            
+            # محاولة قراءة الملف وإضافة السطر الجديد
+            try:
+                # قراءة ورقة المشاركات
+                book = pd.read_excel('school_data.xlsx', sheet_name='Submissions')
+                # إضافة المشاركة الجديدة
+                updated_book = pd.concat([book, new_submission], ignore_index=True)
+                # حفظ الملف
+                with pd.ExcelWriter('school_data.xlsx', engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
+                    updated_book.to_excel(writer, sheet_name='Submissions', index=False)
+                
+                st.success("✅ تم استلام مشاركتك بنجاح، وهي قيد المراجعة.")
+            except Exception as e:
+                st.error(f"حدث خطأ أثناء حفظ المشاركة: {e}")
         else:
             st.warning("يرجى إدخال رابط الفيديو أولاً.")
-
     if st.button("خروج"):
         st.session_state['logged_in'] = False
         st.rerun()
