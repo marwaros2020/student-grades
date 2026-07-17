@@ -87,9 +87,12 @@ else:
                 new_status = st.selectbox("اختر الحالة:", ["Approved", "Rejected"])
                 
                 if st.button("تحديث الحالة"):
-                    # التأكد من أننا نحدث الصف الذي يطابق الرقم القومي فقط
-                    # نحول النوع إلى string لتفادي أخطاء المقارنة
-                    mask = subs_df['National_ID'].astype(str) == target_id.strip()
+                    # تحويل الأعمدة والمدخلات إلى نصوص موحدة للبحث
+                    subs_df['National_ID'] = subs_df['National_ID'].astype(str).str.strip()
+                    search_id = target_id.strip()
+                    
+                    # البحث عن التطابق
+                    mask = subs_df['National_ID'] == search_id
                     
                     if mask.any():
                         subs_df.loc[mask, 'Status'] = new_status
