@@ -36,7 +36,6 @@ if 'logged_in' in st.session_state and st.session_state['logged_in']:
     st.write("### مرحباً بك في صفحة المشاركة")
     st.write(f"المدرسة: {st.session_state['user_data']['School_Name']}")
     # هنا سنضيف لاحقاً زر رفع رابط الفيديو
-    
     if not result.empty:
         st.success("تم العثور على الطالب!")
         st.write(result.iloc[0])
