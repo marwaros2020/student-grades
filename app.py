@@ -100,18 +100,15 @@ if st.checkbox("دخول لوحة التحكم (خاص بالمسؤول)"):
             new_status = st.selectbox("اختر الحالة الجديدة:", ["Approved", "Rejected"])
             
            if st.button("تحديث الحالة"):
-                # تحويل العمود إلى نص أولاً لتجنب مشكلة float64
-                subs_df['Status'] = subs_df['Status'].astype(str)
-                
-                # تحديث الحالة
-                mask = subs_df['National_ID'].astype(str) == target_id
-                subs_df.loc[mask, 'Status'] = new_status
-                
-                # حفظ الملف
-                with pd.ExcelWriter('school_data.xlsx', engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
-                    subs_df.to_excel(writer, sheet_name='Submissions', index=False)
-                st.success("تم تحديث الحالة بنجاح!")
-                st.rerun()
+            # تأكدي أن كل هذه الأسطر تبدأ بنفس المسافة البادئة
+            subs_df['Status'] = subs_df['Status'].astype(str)
+            mask = subs_df['National_ID'].astype(str) == target_id
+            subs_df.loc[mask, 'Status'] = new_status
+            
+            with pd.ExcelWriter('school_data.xlsx', engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
+                subs_df.to_excel(writer, sheet_name='Submissions', index=False)
+            st.success("تم تحديث الحالة بنجاح!")
+            st.rerun()
         except Exception as e:
             st.error(f"لا توجد مشاركات بعد أو حدث خطأ: {e}")
     else:
