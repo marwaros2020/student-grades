@@ -99,9 +99,15 @@ if st.checkbox("دخول لوحة التحكم (خاص بالمسؤول)"):
             target_id = st.text_input("أدخل الرقم القومي للطالب لتعديل حالته:")
             new_status = st.selectbox("اختر الحالة الجديدة:", ["Approved", "Rejected"])
             
-            if st.button("تحديث الحالة"):
-                # منطق تحديث الحالة في الإكسيل
-                subs_df.loc[subs_df['National_ID'].astype(str) == target_id, 'Status'] = new_status
+           if st.button("تحديث الحالة"):
+                # تحويل العمود إلى نص أولاً لتجنب مشكلة float64
+                subs_df['Status'] = subs_df['Status'].astype(str)
+                
+                # تحديث الحالة
+                mask = subs_df['National_ID'].astype(str) == target_id
+                subs_df.loc[mask, 'Status'] = new_status
+                
+                # حفظ الملف
                 with pd.ExcelWriter('school_data.xlsx', engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
                     subs_df.to_excel(writer, sheet_name='Submissions', index=False)
                 st.success("تم تحديث الحالة بنجاح!")
