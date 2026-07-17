@@ -65,7 +65,7 @@ else:
         st.session_state['logged_in'] = False
         st.rerun()
 
-    # لوحة تحكم الإدارة
+    # لوحة تحكم الإدارة (النسخة الموحدة والنهائية)
     st.write("---")
     if st.checkbox("دخول لوحة التحكم (للمسؤول)"):
         password = st.text_input("كلمة المرور:", type="password")
@@ -74,30 +74,23 @@ else:
             try:
                 # قراءة البيانات
                 subs_df = pd.read_excel('school_data.xlsx', sheet_name='Submissions')
-                
-                # تنظيف البيانات (الاحتفاظ فقط بالصفوف التي بها رقم قومي)
+                # تنظيف البيانات
                 subs_df = subs_df.dropna(subset=['National_ID'])
                 
                 # عرض الجدول
-                display_df = subs_df[['National_ID', 'Video_URL', 'Status', 'Comment']]
-                st.dataframe(display_df)
+                st.dataframe(subs_df[['National_ID', 'Video_URL', 'Status', 'Comment']])
                 
-                # التحديث
-                target_id = st.text_input("أدخل الرقم القومي للطالب لتعديل حالته:")
+                # إدخال بيانات التحديث
+                target_id = st.text_input("أدخل الرقم القومي لتعديل الحالة:")
                 new_status = st.selectbox("اختر الحالة:", ["Approved", "Rejected"])
                 
                 if st.button("تحديث الحالة"):
-                    # توحيد نوع البيانات للبحث
                     subs_df['National_ID'] = subs_df['National_ID'].astype(str).str.strip()
                     search_id = target_id.strip()
-                    
-                    # البحث عن التطابق
                     mask = subs_df['National_ID'] == search_id
                     
                     if mask.any():
                         subs_df.loc[mask, 'Status'] = new_status
-                        
-                        # الحفظ
                         with pd.ExcelWriter('school_data.xlsx', engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
                             subs_df.to_excel(writer, sheet_name='Submissions', index=False)
                         st.success(f"تم تحديث حالة الطالب {search_id} إلى {new_status}")
@@ -105,9 +98,4 @@ else:
                     else:
                         st.error("لم يتم العثور على طالب بهذا الرقم القومي.")
             except Exception as e:
-                st.error(f"حدث خطأ: {e}")
-                    else:
-                        st.error("لم يتم العثور على طالب بهذا الرقم القومي.")
-                        
-            except Exception as e:
-                st.error(f"خطأ: {e}")
+                st.error(f"حدث خطأ أثناء المعالجة: {e}")
