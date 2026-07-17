@@ -8,6 +8,7 @@ st.set_page_config(page_title="مسابقة التحدث بالإنجليزية"
 @st.cache_data
 def load_data():
     df = pd.read_excel('school_data.xlsx', sheet_name='Students_List')
+    
     df.columns = df.columns.str.strip()
     return df
 
@@ -74,6 +75,7 @@ else:
             try:
                 # قراءة البيانات
                 subs_df = pd.read_excel('school_data.xlsx', sheet_name='Submissions')
+                subs_df['Status'] = subs_df['Status'].astype(str)
                 # تنظيف البيانات
                 subs_df = subs_df.dropna(subset=['National_ID'])
                 
