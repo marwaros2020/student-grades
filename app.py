@@ -41,3 +41,6 @@ if 'logged_in' in st.session_state and st.session_state['logged_in']:
         st.write(result.iloc[0])
     else:
         st.error("كود الطالب غير موجود، يرجى المحاولة مرة أخرى.")
+        # أضيفي هذا السطر بعد تحميل البيانات مباشرة
+st.write("بيانات الطلاب المكتشفة:", students_df.head())
+st.write("أنواع البيانات في الملف:", students_df.dtypes)
