@@ -1,12 +1,16 @@
 import streamlit as st
 import pandas as pd
-
-# تحميل البيانات
+# تعديل تحميل البيانات للتأكد من قراءة الورقة الصحيحة
 @st.cache_data
 def load_data():
-    return pd.read_excel('school_data.xlsx', sheet_name='Students_List')
+    # تأكدي أن اسم الملف في المجلد هو school_data.xlsx
+    df = pd.read_excel('school_data.xlsx', sheet_name='Students_List')
+    # تنظيف أسماء الأعمدة من أي مسافات مخفية قد تسبب مشاكل
+    df.columns = df.columns.str.strip()
+    return df
 
 students_df = load_data()
+
 
 st.title("🛡️ بوابة مسابقة التحدث باللغة الإنجليزية")
 
