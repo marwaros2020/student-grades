@@ -87,6 +87,8 @@ else:
                 if st.button("تحديث الحالة"):
                     subs_df['National_ID'] = subs_df['National_ID'].astype(str).str.strip()
                     search_id = target_id.strip()
+                    st.write(f"البحث عن: '{search_id}' في: {subs_df['National_ID'].tolist()}")
+
                     mask = subs_df['National_ID'] == search_id
                     
                     if mask.any():
