@@ -85,7 +85,7 @@ else:
                 new_status = st.selectbox("اختر الحالة:", ["Approved", "Rejected"])
                 
                 if st.button("تحديث الحالة"):
-                    subs_df['National_ID'] = subs_df['National_ID'].astype(str).str.strip()
+                    subs_df['National_ID'] = subs_df['National_ID'].astype(float).astype(int).astype(str)
                     search_id = target_id.strip()
                     st.write(f"البحث عن: '{search_id}' في: {subs_df['National_ID'].tolist()}")
 
