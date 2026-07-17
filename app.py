@@ -1,41 +1,41 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
 
-# 1. إعداد الصفحة وتنسيقها (النقطة 3)
-st.set_page_config(page_title="نظام النتائج", page_icon="🎓")
-st.title("🎓 نظام الاستعلام عن نتائج الطلاب")
-st.subheader("مرحباً بك في بوابة نتائج المدرسة")
-
+# تحميل البيانات
 @st.cache_data
 def load_data():
-    return pd.read_excel('students.xlsx')
+    return pd.read_excel('school_data.xlsx', sheet_name='Students_List')
 
-df = load_data()
+students_df = load_data()
 
-# 2. تحسين العرض (النقطة 1)
-student_id = st.number_input("أدخل كود الطالب:", min_value=0, step=1)
+st.title("🛡️ بوابة مسابقة التحدث باللغة الإنجليزية")
 
-if st.button("عرض النتيجة"):
-    result = df[df['student_ID'] == student_id]
+# بوابة الدخول
+st.subheader("تسجيل الدخول للمشاركة")
+input_national_id = st.text_input("أدخل الرقم القومي:")
+input_student_id = st.text_input("أدخل كود الطالب:")
+
+if st.button("دخول"):
+    # البحث عن الطالب في الملف
+    user = students_df[
+        (students_df['National_ID'].astype(str) == input_national_id) & 
+        (students_df['Student_ID'].astype(str) == input_student_id)
+    ]
     
-    if not result.empty:
-        student_data = result.iloc[0]
-        st.success(f"مرحباً {student_data['Student_Name']}!")
-        
-        # عرض البيانات بشكل منظم بدون العمود الإضافي 0
-        display_df = result.drop(columns=['student_ID', 'Student_Name']).T
-        display_df.columns = ['الدرجة']
-        st.table(display_df)
-        
-        # 3. الرسوم البيانية (النقطة 2)
-        st.write("### 📊 تحليل مستوى الطالب")
-        chart_data = display_df.reset_index().rename(columns={'index': 'المادة'})
-        fig = px.bar(chart_data, x='المادة', y='الدرجة', color='الدرجة', color_continuous_scale='Viridis')
-        st.plotly_chart(fig)
-        
+    if not user.empty:
+        st.session_state['logged_in'] = True
+        st.session_state['user_data'] = user.iloc[0]
+        st.success(f"أهلاً بكِ {user.iloc[0]['Student_Name']}! يمكنك الآن البدء.")
+        st.rerun() # تحديث الصفحة للدخول للمرحلة التالية
     else:
-        st.error("كود الطالب غير موجود، يرجى التأكد من الرقم.")
+        st.error("بيانات غير صحيحة أو غير مسجلة في قاعدة البيانات.")
+
+# ما بعد الدخول
+if 'logged_in' in st.session_state and st.session_state['logged_in']:
+    st.write("---")
+    st.write("### مرحباً بك في صفحة المشاركة")
+    st.write(f"المدرسة: {st.session_state['user_data']['School_Name']}")
+    # هنا سنضيف لاحقاً زر رفع رابط الفيديو
     
     if not result.empty:
         st.success("تم العثور على الطالب!")
