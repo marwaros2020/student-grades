@@ -1,51 +1,67 @@
 import streamlit as st
 import pandas as pd
-تعديل تحميل البيانات للتأكد من قراءة الورقة الصحيحة
+
+# 1. إعدادات الصفحة
+st.set_page_config(page_title="مسابقة التحدث بالإنجليزية", layout="centered")
+
+# 2. تحميل البيانات
 @st.cache_data
 def load_data():
-    # تأكدي أن اسم الملف في المجلد هو school_data.xlsx
+    # نقوم بقراءة ملف الإكسيل من ورقة العمل المحددة
     df = pd.read_excel('school_data.xlsx', sheet_name='Students_List')
-    # تنظيف أسماء الأعمدة من أي مسافات مخفية قد تسبب مشاكل
+    # تنظيف أسماء الأعمدة من أي مسافات زائدة
     df.columns = df.columns.str.strip()
     return df
-# تحميل البيانات
-@st.cache_data
-def load_data():
-    return pd.read_excel('school_data.xlsx', sheet_name='Students_List')
 
-students_df = load_data()
+try:
+    students_df = load_data()
+except Exception as e:
+    st.error(f"خطأ في تحميل ملف البيانات: {e}. تأكدي من وجود ملف 'school_data.xlsx' ووجود ورقة عمل باسم 'Students_List'.")
+    st.stop()
 
+# 3. واجهة بوابة الدخول
 st.title("🛡️ بوابة مسابقة التحدث باللغة الإنجليزية")
 
-# بوابة الدخول
-st.subheader("تسجيل الدخول للمشاركة")
-input_national_id = st.text_input("أدخل الرقم القومي:")
-input_student_id = st.text_input("أدخل كود الطالب:")
+if 'logged_in' not in st.session_state:
+    st.session_state['logged_in'] = False
 
-if st.button("دخول"):
-    # البحث عن الطالب في الملف
-    user = students_df[
-        (students_df['National_ID'].astype(str) == input_national_id) & 
-        (students_df['Student_ID'].astype(str) == input_student_id)
-    ]
+if not st.session_state['logged_in']:
+    st.subheader("تسجيل الدخول")
+    input_national_id = st.text_input("أدخل الرقم القومي:")
+    input_student_id = st.text_input("أدخل كود الطالب:")
+
+    if st.button("دخول"):
+        # تحويل المدخلات لنصوص لضمان المطابقة
+        match = students_df[
+            (students_df['National_ID'].astype(str) == input_national_id.strip()) & 
+            (students_df['Student_ID'].astype(str) == input_student_id.strip())
+        ]
+        
+        if not match.empty:
+            st.session_state['logged_in'] = True
+            st.session_state['user_data'] = match.iloc[0]
+            st.success(f"أهلاً بكِ {match.iloc[0]['Student_Name']}!")
+            st.rerun()
+        else:
+            st.error("بيانات غير صحيحة. يرجى التأكد من الرقم القومي وكود الطالب.")
+else:
+    # 4. واجهة المشارك بعد الدخول
+    user = st.session_state['user_data']
+    st.write(f"### مرحباً {user['Student_Name']}")
+    st.write(f"**المدرسة:** {user['School_Name']} | **الفصل:** {user['Supervisor_Teacher']}")
     
-    if not user.empty:
-        st.session_state['logged_in'] = True
-        st.session_state['user_data'] = user.iloc[0]
-        st.success(f"أهلاً بكِ {user.iloc[0]['Student_Name']}! يمكنك الآن البدء.")
-        st.rerun() # تحديث الصفحة للدخول للمرحلة التالية
-    else:
-        st.error("بيانات غير صحيحة أو غير مسجلة في قاعدة البيانات.")
-
-# ما بعد الدخول
-if 'logged_in' in st.session_state and st.session_state['logged_in']:
     st.write("---")
-    st.write("### مرحباً بك في صفحة المشاركة")
-    st.write(f"المدرسة: {st.session_state['user_data']['School_Name']}")
-    # هنا سنضيف لاحقاً زر رفع رابط الفيديو
+    st.write("### صفحة رفع المشاركة")
+    video_url = st.text_input("ضعي رابط فيديو OneDrive هنا:")
+    comment = st.text_area("أضيفي تعليقك (اختياري):")
 
-        # أضيفي هذا السطر بعد تحميل البيانات مباشرة
-st.write("بيانات الطلاب المكتشفة:", students_df.head())
-st.write("أنواع البيانات في الملف:", students_df.dtypes)
+    if st.button("إرسال المشاركة"):
+        if video_url:
+            st.info("تم استلام مشاركتك، وهي الآن قيد المراجعة من قبل الإدارة.")
+            # هنا سنضيف لاحقاً كود حفظ البيانات في ورقة Submissions
+        else:
+            st.warning("يرجى إدخال رابط الفيديو أولاً.")
 
-
+    if st.button("خروج"):
+        st.session_state['logged_in'] = False
+        st.rerun()
